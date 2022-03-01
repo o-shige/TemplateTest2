@@ -7,7 +7,7 @@ public class ChangeHoldTransaction extends ChangeMethodTransaction {
     }
 
     public void Change(Employee e) {
-        e.SetMethod(HoldMethod());
+        e.SetMethod(GetMethod());
     }
 
     PaymentMethod GetMethod() {

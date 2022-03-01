@@ -7,7 +7,7 @@ public class ChangeMailTransaction extends ChangeMethodTransaction {
     }
 
     public void Change(Employee e) {
-        e.SetMethod(MailMethod());
+        e.SetMethod(GetMethod());
     }
 
     PaymentMethod GetMethod() {

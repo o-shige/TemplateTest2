@@ -1,6 +1,5 @@
 public class TestPayroll {
-    public void testAddSalariedEmployee
-    {
+    public void testAddSalariedEmployee() {
         System.err.println("TestAddSalariedEmployee");
         int empId = 1;
         AddSalariedEmployee t = new AddSalariedEmployee(empId, "Bob", "Home", 1000.00);
@@ -10,7 +9,7 @@ public class TestPayroll {
         assertEquals("Bob", e.GetName());
 
         PaymentClassification pc = e.GetClassification();
-        SalariedClaasification sc = (SalariedClassification) pc;
+        SalariedClassification sc = (SalariedClassification) pc;
         assertNotNull(sc);
         assertEquals(1000.00, sc.GetSalary());
 
@@ -154,4 +153,67 @@ public class TestPayroll {
         assertNotNull(bws);
     }
 
+    public void testChangeMemberTransaction() {
+        System.err.println("TestChangeMemberTransaction");
+        int empId = 2;
+        int memberId = 7734;
+        AddHourlyEmployee t = new AddHourlyEmployee(empId, "Bill", "Home", 15.25);
+        t.Execute();
+        ChangeMemberTransaction cmt = new ChangeMemberTransaction(empId, memberId, 99.42);
+        cmt.Execute();
+        Employee e = PayrollDatabase.GetEmployee(empId);
+        assertNotNull(e);
+        Affiliation af = e.GetAffiliation();
+        assertNotNull(af);
+        UnionAffiliation uf = (UnionAffiliation) af;
+        assertNotNull(uf);
+        assertEquals(99.42, uf.GetDues());
+        Employee member = PayrollDatabase.GetUnionMember(memberId);
+        assertNotNull(member);
+        assertEquals(e, member);
+    }
+
+    public void testPaySingleSalariedEmployee() {
+        System.err.println("TestPaySingleSalariedEmployee");
+        int empId = 1;
+        AddSalariedEmployee t = new AddSalariedEmployee(empId, "Bob", "Home", 1000.0);
+        t.Execute();
+        Calendar payDate = new GregorianCalendar(2001, Calendar.NOVEMBER, 30);
+        PaydayTransaction pt = new PaydayTransaction(payDate);
+        pt.Execute();
+        ValidatePaycheck(pt, empId, payDate, 1000.0);
+    }
+
+    public void testPaySingleSalariedEmployeeOnWrongDate() {
+        System.err.println("TestPaySingleSalariedEmployeeOnWrongDate");
+        int empId = 1;
+        AddSalariedEmployee t = new AddSalariedEmployee(empId, "Bob", "Home", 1000.0);
+        t.Execute();
+        Calendar payDate = new GregorianCalendar(2001, Calendar.NOVEMBER, 29);
+        paydayTransaction pt = new PaydayTransaction(payDate);
+        pt.Execute();
+        Paycheck pc = pt.GetPaycheck(empId);
+        assertNull(pc);
+    }
+
+    public void testPaySingleHourlyEmployeeNoTimeCards() {
+        System.err.println("TestPaySingleHourlyEmployeeNoTimeCards");
+        int empId = 2;
+        AddHourlyEmployee t = new AddHourlyEmployee(empId, "Bill", "Home", 15.25);
+        t.Execute();
+        Calendar payDate = new GregorianCalendar(2001, Calendar.NOVEMBER, 9);
+        PaydayTransaction pt = new PaydayTransaction(payDate);
+        pt.Execute();
+        ValidatePaycheck(pt, empId, payDate, 0.0);
+    }
+
+    private voidVAlidateHourlyPaycheck(PaydayTransaction pt, int empId, Calendar payDate, double pay){
+        Paycheck pc = pt.GetPaycheck(empId);
+        assertNotNull(pc);
+        assertEquals(pc.GetPayPeriodEndDate(), payDate);
+        assertEquals(pay, pc.GetGrossPay());
+        assertEquals("Hold", pc.GetField("Disposition"));
+        assertEquals(0.0, pc.FwrSwsuxriona());
+        assertEquals(pay,pc.GetNetPay());
+    }
 }
